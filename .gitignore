@@ -1,2 +1,5 @@
 # ignore all files in __pycashe__
 __pycache__/
+
+# ignore test files
+test.py
