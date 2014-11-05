@@ -1,9 +1,3 @@
-# Problem Set 5: 6.00 Word Game
-# Name: 
-# Collaborators: 
-# Time: 
-#
-
 import random
 import string
 
@@ -12,12 +6,11 @@ CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
 HAND_SIZE = 7
 
 SCRABBLE_LETTER_VALUES = {
-    'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1, 'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1, 'o': 1, 'p': 3, 'q': 10, 'r': 1, 's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10
-}
+    'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1,
+    'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1, 'o': 1, 'p': 3, 'q': 10, 'r': 1,
+    's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10
+    }
 
-# -----------------------------------
-# Helper code
-# (you don't need to understand this helper code)
 
 WORDLIST_FILENAME = "words.txt"
 
@@ -30,7 +23,7 @@ def load_words():
     """
     print ("Loading word list from file...")
     # inFile: file
-    inFile = open(WORDLIST_FILENAME, 'r') # inFile = open(WORDLIST_FILENAME, 'r', 0) "origional"
+    inFile = open(WORDLIST_FILENAME, 'r') 
     # wordlist: list of strings
     wordlist = []
     for line in inFile:
@@ -53,13 +46,6 @@ def get_frequency_dict(sequence):
         freq[x] = freq.get(x,0) + 1
     return freq
 
-
-# (end of helper code)
-# -----------------------------------
-
-#
-# Problem #1: Scoring a word
-#
 def get_word_score(word, n):
     """
     Returns the score for a word. Assumes the word is a
@@ -82,9 +68,6 @@ def get_word_score(word, n):
         score += 50
     return score
 
-#
-# Make sure you understand how this function works and what it does!
-#
 def display_hand(hand):
     """
     Displays the letters currently in the hand.
@@ -97,15 +80,14 @@ def display_hand(hand):
 
     hand: dictionary (string -> int)
     """
-    
+
+    print("\nYour hand is")
     for letter in hand.keys():
         for j in range(hand[letter]):
-            print (letter, end = ' ')             # print all on the same line
-    print()                              # print an empty line
+            print (letter, end = ' ')   # prints all on the same line
+    print()                             # print an empty line
 
-#
-# Make sure you understand how this function works and what it does!
-#
+
 def deal_hand(n):
     """
     Returns a random hand containing n lowercase letters.
@@ -132,9 +114,7 @@ def deal_hand(n):
         
     return hand
 
-#
-# Problem #2: Update a hand by removing letters
-#
+
 def update_hand(hand, word):
     """
     Assumes that 'hand' has all the letters in word.
@@ -152,15 +132,12 @@ def update_hand(hand, word):
     returns: dictionary (string -> int)
     """
 
-    newHand = {}
-    for letter in hand.keys():
-        newHand[letter] = hand[letter] - word.count(letter)
+    newHand = hand.copy()   # prevint mutation
+    for letter in word:
+        newHand[letter] -= 1
     return newHand
         
 
-#
-# Problem #3: Test word validity
-#
 def is_valid_word(word, hand, word_list):
     """
     Returns True if word is in the word_list and is entirely
@@ -171,20 +148,13 @@ def is_valid_word(word, hand, word_list):
     hand: dictionary (string -> int)
     word_list: list of lowercase strings
     """
-    isValid = False
-    wordDic = {}
-    for letter in word:
-        wordDic[letter] = wordDic.get(letter, 0) + 1
-    for letter in wordDic.keys():
-        if wordDic[letter] > hand.get(letter, 0):
-            return False
-    if word not in word_list:
-        return False
-    return True
+    wordDic = get_frequency_dict(word)
+    inWordList = word in word_list
+    inHand = not any(wordDic[letter] > hand.get(letter, 0)
+                     for letter in wordDic.keys())
+    return inWordList and inHand
 
-#
-# Problem #4: Playing a hand
-#
+
 def play_hand(hand, word_list):
     """
     Allows the user to play the given hand, as follows:
@@ -218,7 +188,7 @@ def play_hand(hand, word_list):
     while True:
         display_hand (hand)
         while True:
-            userWord = input ("\nPlease input a word from your hand. \n --> ")
+            userWord = input ("\nPlease input a word from your hand or '.' to stop. \n --> ")
             if is_valid_word(userWord, hand, word_list):
                 break
             elif userWord == ".":
@@ -227,11 +197,12 @@ def play_hand(hand, word_list):
             else:
                 print ("\nThe word you input is ether not in your hand or not in the dictionary.\nPlease try again.\n")
         hand = update_hand(hand, userWord)
-        score = get_word_score(userWord, HAND_SIZE)
-        print ("\nthat word scored,", score)
+        score = get_word_score(userWord, HAND_SIZE) #update score
         scoreTot += score
+        print ("\nThat word scored,", score)
+        print ("Your score total is now,", scoreTot)
         sumHand = 0
-        for x in hand:
+        for x in hand: # check there are still letters in the hand
             sumHand += hand[x]
         if sumHand <= 0:
             break
@@ -239,12 +210,6 @@ def play_hand(hand, word_list):
     print ("\nIn that hand you scored", scoreTot)
     
     
-
-
-#
-# Problem #5: Playing a game
-# Make sure you understand how this code works!
-# 
 def play_game(word_list):
     """
     Allow the user to play an arbitrary number of hands.
@@ -263,7 +228,7 @@ def play_game(word_list):
 
     hand = deal_hand(HAND_SIZE) # random init
     while True:
-        cmd = input('Enter n to deal a new hand, r to replay the last hand, or e to end game: ')
+        cmd = input('\nEnter n to deal a new hand, r to replay the last hand, or e to end game: ')
         if cmd == 'n':
             hand = deal_hand(HAND_SIZE)
             play_hand(hand.copy(), word_list)
@@ -272,6 +237,7 @@ def play_game(word_list):
             play_hand(hand.copy(), word_list)
             print
         elif cmd == 'e':
+            print ("Thanks for playing.\nGoodbye.")
             break
         else:
             print ("Invalid command.")
