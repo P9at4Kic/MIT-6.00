@@ -1,5 +1,6 @@
 import random
 import string
+import time
 
 VOWELS = 'aeiou'
 CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
@@ -155,6 +156,17 @@ def is_valid_word(word, hand, word_list):
     return inWordList and inHand
 
 
+def decimal_place(num, n):
+    """
+    returns a string of a float to n decimal places
+    num: float
+    n: int
+    """
+    num = str(num)
+    dec = num.find(".")
+    return (num[:dec+1+n])
+    
+
 def play_hand(hand, word_list):
     """
     Allows the user to play the given hand, as follows:
@@ -185,28 +197,24 @@ def play_hand(hand, word_list):
     """
 
     scoreTot = 0
-    while True:
+    while sum(hand.values()) > 0:
         display_hand (hand)
-        while True:
-            userWord = input ("\nPlease input a word from your hand or '.' to stop. \n --> ")
-            if is_valid_word(userWord, hand, word_list):
-                break
-            elif userWord == ".":
-                print ("\nIn that hand you scored", scoreTot)
-                return
-            else:
-                print ("\nThe word you input is ether not in your hand or not in the dictionary.\nPlease try again.\n")
-        hand = update_hand(hand, userWord)
-        score = get_word_score(userWord, HAND_SIZE) #update score
-        scoreTot += score
-        print ("\nThat word scored,", score)
-        print ("Your score total is now,", scoreTot)
-        sumHand = 0
-        for x in hand: # check there are still letters in the hand
-            sumHand += hand[x]
-        if sumHand <= 0:
-            break
-        print ()
+        sTime = time.time()
+        userWord = input ("\nPlease input a word from your hand or '.' to stop. \n --> ")
+        if is_valid_word(userWord, hand, word_list):
+            eTime = time.time()
+            tTime = eTime - sTime
+            print ("Ansered in", decimal_place(tTime, 2), "seconds")
+            hand = update_hand(hand, userWord)
+            score = get_word_score(userWord, HAND_SIZE) / tTime #update score
+            scoreTot += score
+            print ("\nThat word scored,", decimal_place(score, 2))
+            print ("Your score total is now,", decimal_place(scoreTot, 2))
+        elif userWord == ".":
+            print ("\nIn that hand you scored", decimal_place(scoreTot, 2))
+            return
+        else:
+            print ("\nThe word you input is ether not in your hand or not in the dictionary.\nPlease try again.\n")
     print ("\nIn that hand you scored", scoreTot)
     
     

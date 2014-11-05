@@ -197,6 +197,9 @@ def test_is_valid_word(word_list):
     if not failure:
         print ("SUCCESS: test_is_valid_word()")
 
+print (decimal_place(1.123456789, 2))
+
+
 
 word_list = load_words()
 print ("----------------------------------------------------------------------")
