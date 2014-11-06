@@ -5,15 +5,31 @@ import time
 VOWELS = 'aeiou'
 CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
 HAND_SIZE = 7
-
+TIME_LIM = 30
 SCRABBLE_LETTER_VALUES = {
     'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1,
     'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1, 'o': 1, 'p': 3, 'q': 10, 'r': 1,
     's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10
     }
 
-
 WORDLIST_FILENAME = "words.txt"
+
+def change_state ():
+    global HAND_SIZE
+    global TIME_LIM
+    print("The current hand size is,", HAND_SIZE)
+    print("The current time limit is,", TIME_LIM)
+    while True:
+        try:
+            HAND_SIZE = int (input (
+                "Please input a new value for the hand size:"))
+            TIME_LIM = int (input (
+                "Please input a new value for the time limit:"))
+            assert HAND_SIZE > 0 and TIME_LIM > 0
+            break
+        except:
+            print ("Please input positive intergers")
+                                    
 
 def load_words():
     """
@@ -156,15 +172,14 @@ def is_valid_word(word, hand, word_list):
     return inWordList and inHand
 
 
-def decimal_place(num, n):
+def decimal_place(num):
     """
-    returns a string of a float to n decimal places
+    returns a string of a float to 2 decimal places
     num: float
-    n: int
     """
     num = str(num)
     decimal = num.find(".")
-    return (num[:decimal+1+n])
+    return (num[:decimal+3])
     
 
 def play_hand(hand, word_list):
@@ -197,30 +212,33 @@ def play_hand(hand, word_list):
     """
 
     scoreTot = 0
-    timeLeft = 30
+    timeLeft = TIME_LIM
     while sum(hand.values()) > 0:
         display_hand (hand)
         sTime = time.time()
-        word = input ("\nPlease input a word from your hand or '.' to stop. \n --> ")
+        print ("\nPlease input a word from your hand or '.' to stop. ")
+        word = input (" --> ")
         eTime = time.time()
         tTime = eTime - sTime   # time taken to enter word
-        timeLeft -= tTime        # time taken to play hand
-        print ("You answered in", decimal_place(tTime, 2), "seconds")
+        timeLeft -= tTime       # time left to play hand
+        if word == ".":
+            break
+        print ("You answered in", decimal_place(tTime), "seconds")
         if timeLeft < 0:
             print ("You have run out of time")
             break
-        print ("You have", decimal_place(timeLeft, 2), "seconds left.")
+        print ("You have", decimal_place(timeLeft), "seconds left.")
         if is_valid_word(word, hand, word_list):
             hand = update_hand(hand, word)
-            score = get_word_score(word, HAND_SIZE) / tTime #update score
+            score = get_word_score(word, HAND_SIZE) # get score
+            score = score / tTime * 2               # adjust for time taken
             scoreTot += score
-            print ("\nThat word scored,", decimal_place(score, 2))
-            print ("Your score total is now,", decimal_place(scoreTot, 2))
-        elif word == ".":
-            break
+            print ("\nThat word scored,", decimal_place(score))
+            print ("Your score total is now,", decimal_place(scoreTot))
         else:
-            print ("\nThe word you input is ether not in your hand or not in the dictionary.\nPlease try again.\n")
-    print ("\nIn that hand you scored", scoreTot)
+            print ("\nThe word you input is ether not in your hand")
+            print ("or not in the dictionary. Please try again.\n")
+    print ("\nIn that hand you scored", decimal_place(scoreTot))
     
     
 def play_game(word_list):
@@ -239,19 +257,26 @@ def play_game(word_list):
     * If the user inputs anything else, ask them again.
     """
 
-    hand = deal_hand(HAND_SIZE) # random init
     while True:
-        cmd = input('\nEnter n to deal a new hand, r to replay the last hand, or e to end game: ')
-        if cmd == 'n':
+        handExists = "hand" in locals()
+        print ("\nEnter n to deal a new hand,")
+        if handExists:
+            print ("      r to replay the last hand,")
+        print ("      i to reset the hand and time limit,")
+        print ("      e to end game:")
+        cmd = input("--> ")
+        if cmd == "n":
             hand = deal_hand(HAND_SIZE)
             play_hand(hand.copy(), word_list)
             print
-        elif cmd == 'r':
+        elif cmd == "r" and handExists:
             play_hand(hand.copy(), word_list)
             print
-        elif cmd == 'e':
+        elif cmd == "e":
             print ("Thanks for playing.\nGoodbye.")
             break
+        elif cmd == "i":
+            change_state()
         else:
             print ("Invalid command.")
 
