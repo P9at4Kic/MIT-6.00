@@ -11,7 +11,7 @@ def test_deal_hand():
     # (A)
     # Basic test, see if the right kind of dictionary is
     # being returned.
-    hand = deal_hand(HAND_SIZE)
+    hand = deal_hand()
     if not type(hand) is dict:
         print ("FAILURE: test_deal_hand()")
         print ("\tUnexpected return type:", type(hand))
@@ -43,9 +43,9 @@ def test_deal_hand():
     # (B)
     # Tests randomness..
     repeats=0
-    hand1 = deal_hand(HAND_SIZE)
+    hand1 = deal_hand()
     for i in range(20):                
-        hand2 = deal_hand(HAND_SIZE)
+        hand2 = deal_hand()
         if hand1 == hand2:
             repeats += 1
         hand1 = hand2
@@ -56,7 +56,24 @@ def test_deal_hand():
         print ("\tIs the deal_hand implementation really using random numbers?")
 
         return # exit function
-    
+
+    sumHand = {}
+    sampleSize = 800
+    for x in range(sampleSize):
+        hand = deal_hand()
+        for y in hand:
+            sumHand[y] = sumHand.get(y, 0) + hand[y]
+    error = 0
+    for x in SCRABBLE_TILES:
+        letterAdjusted = sumHand.get(x, 0) * 98 / (HAND_SIZE * sampleSize)
+        letterDifferance = letterAdjusted - SCRABBLE_TILES[x][1]
+        error += abs(letterDifferance)
+
+    if error / 7 > 1:
+        print ("FAILURE: test_deal_hand()")
+        print ("\tThe Letter distribution is not representitive of scrabble.")
+        print ("\tThe error in distribution is:", error)
+        
     print ("SUCCESS: test_deal_hand()")
 
 def test_get_word_score():
@@ -199,6 +216,9 @@ def test_is_valid_word(word_list):
 
 
 word_list = load_words()
+print ("----------------------------------------------------------------------")
+print ("Testing deal_hand...")
+test_deal_hand()
 print ("----------------------------------------------------------------------")
 print ("Testing get_word_score...")
 test_get_word_score()

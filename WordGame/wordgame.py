@@ -1,16 +1,17 @@
 import random
 import string
+import copy
 
-VOWELS = 'aeiou'
-CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
 HAND_SIZE = 7
-
-SCRABBLE_LETTER_VALUES = {
-    'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1,
-    'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1, 'o': 1, 'p': 3, 'q': 10, 'r': 1,
-    's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10
+# scrable letter: (value, distribution)
+SCRABBLE_TILES = {
+    'a': [1 , 9], 'b': [3 , 2], 'c': [3, 2], 'd': [2, 4], 'e': [1, 12],
+    'f': [4 , 2], 'g': [2 , 3], 'h': [4, 2], 'i': [1, 9], 'j': [8, 1 ],
+    'k': [5 , 1], 'l': [1 , 4], 'm': [3, 2], 'n': [1, 6], 'o': [1, 8 ],
+    'p': [3 , 2], 'q': [10, 1], 'r': [1, 6], 's': [1, 4], 't': [1, 6 ],
+    'u': [1 , 4], 'v': [4 , 2], 'w': [4, 2], 'x': [8, 1], 'y': [4, 2 ],
+    'z': [10, 1]
     }
-
 
 WORDLIST_FILENAME = "words.txt"
 
@@ -63,7 +64,7 @@ def get_word_score(word, n):
     """
     score = 0
     for letter in word:
-        score += SCRABBLE_LETTER_VALUES[letter]
+        score += SCRABBLE_TILES[letter][0]
     if len(word) == n:
         score += 50
     return score
@@ -88,31 +89,31 @@ def display_hand(hand):
     print()                             # print an empty line
 
 
-def deal_hand(n):
+def deal_hand():
     """
-    Returns a random hand containing n lowercase letters.
-    At least n/3 the letters in the hand should be VOWELS.
+    Returns a random hand containing as many lowercase letters as the
+    value of HAND_SIZE, with the same distribution as scrable
 
     Hands are represented as dictionaries. The keys are
     letters and the values are the number of times the
     particular letter is repeated in that hand.
 
-    n: int >= 0
     returns: dictionary (string -> int)
     """
     
     hand={}
-    num_vowels = n // 3
-    
-    for i in range(num_vowels):
-        x = VOWELS[random.randrange(0,len(VOWELS))]
-        hand[x] = hand.get(x, 0) + 1
-        
-    for i in range(num_vowels, n):    
-        x = CONSONANTS[random.randrange(0,len(CONSONANTS))]
-        hand[x] = hand.get(x, 0) + 1
-        
+    scrbbleTiles = copy.deepcopy(SCRABBLE_TILES)
+    for tile in range (HAND_SIZE):
+        tileNo = random.randrange(0,98 - tile)
+        for letter in scrbbleTiles:
+            tileNo -= scrbbleTiles[letter][1]
+            if tileNo < 0:
+                hand[letter] = hand.get(letter, 0) + 1
+                scrbbleTiles[letter][1] -= 1
+                break
     return hand
+      
+    
 
 
 def update_hand(hand, word):
@@ -226,11 +227,11 @@ def play_game(word_list):
     * If the user inputs anything else, ask them again.
     """
 
-    hand = deal_hand(HAND_SIZE) # random init
+    hand = deal_hand() # random init
     while True:
         cmd = input('\nEnter n to deal a new hand, r to replay the last hand, or e to end game: ')
         if cmd == 'n':
-            hand = deal_hand(HAND_SIZE)
+            hand = deal_hand()
             play_hand(hand.copy(), word_list)
             print
         elif cmd == 'r':
